@@ -46,7 +46,7 @@ body{background:var(--bg);color:#fff}
 var tg = window.Telegram ? window.Telegram.WebApp : null; if(tg){tg.ready();tg.expand();}
 var uid = tg && tg.initDataUnsafe && tg.initDataUnsafe.user ? tg.initDataUnsafe.user.id : 0;
 var firstName = tg && tg.initDataUnsafe && tg.initDataUnsafe.user ? tg.initDataUnsafe.user.first_name : "Player";
-var WEBHOOK = "https://api.telebotcreator.com/new-webhook?data=TBCSECRET_secret_4bc286da";
+var WEBHOOK = "https://api.telebotcreator.com/new-webhook?data=TBCSECRET_secret_8f1ca76f";
 var balance = 0;
 var cpd=100, cps=2;
 function updateBal(){
@@ -94,31 +94,31 @@ window.setBet=function(v){
   else a.innerHTML='<button class="btn" onclick="playGame(0)">PLAY NOW</button>';
 }
 window.playGame=function(pick){
-  if(Date.now()>deadLine){alert('⏰ Time out!'); fetch(WEBHOOK+'&user_id='+uid,{method:'POST',body:JSON.stringify({action:'bet',game:activeGame,bet:currentBet,pick:pick,win:false})}).catch(function(){}); syncBalance(); showScreen('games'); return;}
+  if(Date.now()>deadLine){alert('⏰ Time out!'); fetch(WEBHOOK+'&user_id='+uid,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'bet',game:activeGame,bet:currentBet,pick:pick,win:false})}).catch(function(){}); syncBalance(); showScreen('games'); return;}
   var win=Math.random()<0.45; if(['gem','treasure','snake'].includes(activeGame)) win=(pick===hidden)&&Math.random()<0.5;
-  fetch(WEBHOOK+'&user_id='+uid,{method:'POST',body:JSON.stringify({action:'bet',game:activeGame,bet:currentBet,pick:pick,win:win})}).then(function(r){return r.json()}).then(function(j){
+  fetch(WEBHOOK+'&user_id='+uid,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'bet',game:activeGame,bet:currentBet,pick:pick,win:win})}).then(function(r){return r.json()}).then(function(j){
     if(j && j.ok){ balance=parseFloat(j.balance); updateBal(); alert(j.win?'🎉 WIN +'+(j.profit||0)+' coins':'😢 Lose -'+currentBet); } else { alert((j && j.error)||'Error'); syncBalance(); }
     showScreen('games');
-  }).catch(function(){ alert('Network error - check bot'); syncBalance(); showScreen('games'); });
+  }).catch(function(){ alert('Network - check bot'); syncBalance(); showScreen('games'); });
 }
 window.depositStars=function(s){
-  fetch(WEBHOOK+'&user_id='+uid,{method:'POST',body:JSON.stringify({action:'deposit_stars',stars:s})}).then(function(r){return r.json()}).then(function(j){ alert(j.ok?'⭐ Invoice sent in bot chat':'Error'); }).catch(function(){alert('Sent');});
+  fetch(WEBHOOK+'&user_id='+uid,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'deposit_stars',stars:s})}).then(function(r){return r.json()}).then(function(j){ alert(j.ok?'⭐ Invoice sent in bot chat':'Error'); }).catch(function(){alert('Sent');});
 }
 window.withdraw=function(){
   var a=parseFloat(document.getElementById('wdAmt').value), i=document.getElementById('wdInfo').value;
   if(!a||a>balance){alert('Invalid');return;}
-  fetch(WEBHOOK+'&user_id='+uid,{method:'POST',body:JSON.stringify({action:'withdraw',amount:a,info:i})}).then(function(r){return r.json()}).then(function(j){ if(j.ok){balance=parseFloat(j.balance); updateBal(); alert('Withdraw '+a+' requested');} else alert(j.error||'Error');}).catch(function(){alert('Requested');});
+  fetch(WEBHOOK+'&user_id='+uid,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'withdraw',amount:a,info:i})}).then(function(r){return r.json()}).then(function(j){ if(j.ok){balance=parseFloat(j.balance); updateBal(); alert('Withdraw '+a+' requested');} else alert(j.error||'Error');}).catch(function(){alert('Requested');});
 }
 window.sendSupport=function(){
   var m=document.getElementById('supMsg').value; if(!m) return;
-  fetch(WEBHOOK+'&user_id='+uid,{method:'POST',body:JSON.stringify({action:'support',msg:m})}).then(function(){document.getElementById('supHist').innerHTML+='<div>You: '+m+'</div>'; document.getElementById('supMsg').value=''; alert('Sent');}).catch(function(){alert('Sent');});
+  fetch(WEBHOOK+'&user_id='+uid,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'support',msg:m})}).then(function(){document.getElementById('supHist').innerHTML+='<div>You: '+m+'</div>'; document.getElementById('supMsg').value=''; alert('Sent');}).catch(function(){alert('Sent');});
 }
 function syncBalance(){
   if(!uid || uid==0){ document.getElementById('syncStatus').innerHTML='❌ Open INSIDE Telegram, not Chrome'; document.getElementById('syncStatus').style.background='#ff4444'; return; }
   document.getElementById('syncStatus').innerHTML='⏳ Syncing balance...';
-  fetch(WEBHOOK+'&user_id='+uid,{method:'POST',body:JSON.stringify({action:'balance',user_id:uid})})
+  fetch(WEBHOOK+'&user_id='+uid,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'balance',user_id:uid})})
   .then(function(r){return r.json()})
-  .then(function(j){ if(j && j.ok){ balance=parseFloat(j.balance); cpd=j.cpd||100; cps=j.cps||2; updateBal(); } else { document.getElementById('syncStatus').innerHTML='❌ Sync failed: '+(j.error||'error'); }})
+  .then(function(j){ if(j && j.ok){ balance=parseFloat(j.balance); cpd=j.cpd||100; cps=j.cps||2; updateBal(); } else { document.getElementById('syncStatus').innerHTML='❌ Sync failed: '+(j.error||'error'); document.getElementById('syncStatus').style.background='#ff4444'; }})
   .catch(function(){ document.getElementById('syncStatus').innerHTML='❌ Network - check Pages is ON'; });
 }
 if(uid==0){ document.getElementById('syncStatus').innerHTML='❌ Open this inside Telegram app'; document.getElementById('bal').innerHTML='Open in Telegram'; } else { syncBalance(); }
